@@ -13,6 +13,7 @@
         }
     },
     "scripts": {
+        "serve": "php -S 127.0.0.1:8080 public/index.php -t public",
         "analyze": ["phpstan analyse -c phpstan.neon"],
         "test": ["phpunit"]
     },
