@@ -57,4 +57,19 @@ class RouterTest extends TestCase
             $response->getBody()->__toString()
         );
     }
+
+    /**
+     * @test
+     */
+    public function methodNotAllowed()
+    {
+        $this->expectException(MethodNotAllowedException::class);
+        // リクエストのモック
+        $request = $this->creator->fromArrays(
+            server: ['REQUEST_METHOD' => 'QUERY', 'REQUEST_URI' => '/sample'],
+            get: ['id' => '1']
+        );
+        // リクエストの処理をルーターに移譲
+        $response = $this->router->resolve($request);
+    }
 }

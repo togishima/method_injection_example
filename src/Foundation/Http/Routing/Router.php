@@ -6,6 +6,7 @@ use App\Foundation\DI\Container;
 use App\Foundation\Http\Enums\HttpMethod;
 use App\Foundation\Http\Routing\Exceptions\MethodNotAllowedException;
 use App\Foundation\Http\Routing\Exceptions\RouteAlreadyExistsException;
+use App\Foundation\Http\Routing\Exceptions\RouteNotFoundException;
 use App\Http\Controllers\SampleController;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\RequestInterface;
@@ -49,13 +50,41 @@ class Router
         return count($duplicate) !== 0;
     }
 
+    /**
+     * Resolve Request
+     *
+     * @param RequestInterface $request
+     * @return ResponseInterface
+     * @throws MethodNotAllowedException|RouteNotFoundException
+     */
     public function resolve(RequestInterface $request): ResponseInterface
     {
+        if (!array_key_exists($request->getMethod(), $this->routes)) {
+            throw new MethodNotAllowedException();
+        }
+        $route = $this->findRoute($request);
         // コントローラーのインスタンス化
-        $controller = $this->container->get(SampleController::class);
+        $controller = $this->container->get($route->controller);
         // アクションの実行
-        $response = $controller->index($request);
+        $response = $controller->{$route->action}($request);
 
         return $response;
+    }
+
+    /**
+     * @param RequestInterface $request
+     * @return Route
+     * @throws RouteNotFoundException
+     */
+    private function findRoute(RequestInterface $request): Route
+    {
+        $matchedRoutes = array_filter(
+            $this->routes[$request->getMethod()],
+            fn (Route $route) => $route->uri === $request->getUri()->getPath()
+        );
+        if (count($matchedRoutes) !== 1) {
+            throw new RouteNotFoundException();
+        }
+        return current($matchedRoutes);
     }
 }
