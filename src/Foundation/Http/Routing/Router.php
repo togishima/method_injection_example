@@ -63,8 +63,10 @@ class Router
         $route = $this->findRoute($request);
         // コントローラーのインスタンス化
         $controller = $this->container->get($route->controller);
+        // 依存クラスの取得
+        $dependencies = Container::instantiateDependencies($route->controller, $route->action);
         // アクションの実行
-        $response = $controller->{$route->action}($request);
+        $response = $controller->{$route->action}(...$dependencies);
 
         return $response;
     }
