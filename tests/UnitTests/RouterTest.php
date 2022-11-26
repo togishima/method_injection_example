@@ -41,10 +41,10 @@ class RouterTest extends TestCase
     public function resolve()
     {
         // リクエストのモック
-        $request = $this->creator->fromArrays(
-            server: ['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/sample'],
-            get: ['id' => '1']
-        );
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = '/sample';
+        $_GET['id'] = '1';
+        $request = $this->creator->fromGlobals();
         // リクエストの処理をルーターに移譲
         $response = $this->router->resolve($request);
         // 処理された後のレスポンス確認
