@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Foundation\Http\Routing;
+
+use App\Foundation\Http\Enums\HttpMethod;
+
+class Route
+{
+    private function __construct(
+        public readonly HttpMethod $httpMethod,
+        public readonly string $uri,
+        public readonly string $controller,
+        public readonly string $action,
+    ) {
+    }
+
+    public static function get(string $uri, string $controller, ?string $action = null):self
+    {
+        $action = $action ?? '__invoke';
+        return new self(HttpMethod::GET, $uri, $controller, $action);
+    }
+
+    /**
+     * 以下略...
+     */
+}
