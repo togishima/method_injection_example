@@ -20,6 +20,6 @@ return [
     ResponseFactoryInterface::class => fn(ContainerInterface $c) => $c->get(Psr17Factory::class),
     ServerRequestInterface::class => function(ContainerInterface $c) {
         $requestCreator = $c->get(ServerRequestCreatorInterface::class);
-        return $requestCreator->createFromGlobals();
+        return $requestCreator->fromGlobals();
     }
 ];
