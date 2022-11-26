@@ -8,7 +8,7 @@ use Psr\Container\ContainerInterface;
 
 class Container extends DIContainer
 {
-    private static ?self $instance = null;
+    private static ?ContainerInterface $instance = null;
 
     private function __construct()
     {
@@ -16,12 +16,11 @@ class Container extends DIContainer
 
     public static function instance(): ContainerInterface
     {
-        if (self::$instance !== null) {
-            return self::$instance;
+        if (self::$instance === null) {
+            $builder = new ContainerBuilder();
+            $builder->addDefinitions(__DIR__ . '/config.php');
+            self::$instance = $builder->build();
         }
-        $builder = new ContainerBuilder();
-        $builder->addDefinitions(__DIR__.'/config.php');
-
-        return $builder->build();
+        return self::$instance;
     }
 }
