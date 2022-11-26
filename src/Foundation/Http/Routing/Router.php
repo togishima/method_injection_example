@@ -7,11 +7,9 @@ use App\Foundation\Http\Enums\HttpMethod;
 use App\Foundation\Http\Routing\Exceptions\MethodNotAllowedException;
 use App\Foundation\Http\Routing\Exceptions\RouteAlreadyExistsException;
 use App\Foundation\Http\Routing\Exceptions\RouteNotFoundException;
-use App\Http\Controllers\SampleController;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-
+use Psr\Http\Message\ServerRequestInterface;
 
 class Router
 {
@@ -53,11 +51,11 @@ class Router
     /**
      * Resolve Request
      *
-     * @param RequestInterface $request
+     * @param ServerRequestInterface $request
      * @return ResponseInterface
      * @throws MethodNotAllowedException|RouteNotFoundException
      */
-    public function resolve(RequestInterface $request): ResponseInterface
+    public function resolve(ServerRequestInterface $request): ResponseInterface
     {
         if (!array_key_exists($request->getMethod(), $this->routes)) {
             throw new MethodNotAllowedException();
@@ -72,11 +70,11 @@ class Router
     }
 
     /**
-     * @param RequestInterface $request
+     * @param ServerRequestInterface $request
      * @return Route
      * @throws RouteNotFoundException
      */
-    private function findRoute(RequestInterface $request): Route
+    private function findRoute(ServerRequestInterface $request): Route
     {
         $matchedRoutes = array_filter(
             $this->routes[$request->getMethod()],
