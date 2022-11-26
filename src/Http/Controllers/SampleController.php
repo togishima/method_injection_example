@@ -22,4 +22,9 @@ class SampleController extends BaseController
             'child' => $model->child->name,
         ]);
     }
+
+    public function update(ServerRequestInterface $request): ResponseInterface
+    {
+        return $this->response('update() called');
+    }
 }
