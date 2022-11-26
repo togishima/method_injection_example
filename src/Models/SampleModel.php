@@ -12,4 +12,9 @@ class SampleModel
         $this->name = 'SampleModel';
         $this->child = $child;
     }
+
+    public static function find(int $id): self
+    {
+        return new self(new ChildModel());
+    }
 }
