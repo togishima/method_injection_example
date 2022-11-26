@@ -1,6 +1,7 @@
 <?php
 
 use App\Foundation\DI\Container;
+use App\Foundation\Http\Routing\Exceptions\MethodNotAllowedException;
 use App\Foundation\Http\Routing\Exceptions\RouteAlreadyExistsException;
 use App\Foundation\Http\Routing\Route;
 use App\Foundation\Http\Routing\Router;
@@ -19,6 +20,7 @@ class RouterTest extends TestCase
             Route::get('/sample', SampleController::class, 'index'),
         ];
         $this->router = new Router($routes);
+        $this->creator = Container::instance()->get(ServerRequestCreatorInterface::class);
     }
 
     /**
@@ -31,5 +33,28 @@ class RouterTest extends TestCase
             Route::get('/sample', SampleController::class, 'index'),
             Route::get('/sample', SampleController::class, 'index')
         ]);
+    }
+
+    /**
+     * @test
+     */
+    public function resolve()
+    {
+        // リクエストのモック
+        $request = $this->creator->fromArrays(
+            server: ['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/sample'],
+            get: ['id' => '1']
+        );
+        // リクエストの処理をルーターに移譲
+        $response = $this->router->resolve($request);
+        // 処理された後のレスポンス確認
+        $this->assertEquals(
+            json_encode([
+                'message' => 'this is index controller',
+                'model' => 'SampleModel',
+                'child' => 'ChildModel',
+            ]),
+            $response->getBody()->__toString()
+        );
     }
 }

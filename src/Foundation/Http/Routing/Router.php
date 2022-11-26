@@ -16,6 +16,7 @@ class Router
 {
     /** @var array<string,array<Route> */
     private array $routes;
+    private ContainerInterface $container;
 
     /**
      * @param array<Route>>
@@ -36,6 +37,7 @@ class Router
             }
             $this->routes[$route->httpMethod->name][] = $route;
         }
+        $this->container = Container::instance();
     }
 
     private function isDuplicate(Route $route): bool
@@ -45,5 +47,15 @@ class Router
             fn (Route $registeredRoute) => $registeredRoute->uri === $route->uri
         );
         return count($duplicate) !== 0;
+    }
+
+    public function resolve(RequestInterface $request): ResponseInterface
+    {
+        // コントローラーのインスタンス化
+        $controller = $this->container->get(SampleController::class);
+        // アクションの実行
+        $response = $controller->index($request);
+
+        return $response;
     }
 }
