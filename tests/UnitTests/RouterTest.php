@@ -3,6 +3,7 @@
 use App\Foundation\DI\Container;
 use App\Foundation\Http\Routing\Exceptions\MethodNotAllowedException;
 use App\Foundation\Http\Routing\Exceptions\RouteAlreadyExistsException;
+use App\Foundation\Http\Routing\Exceptions\RouteNotFoundException;
 use App\Foundation\Http\Routing\Route;
 use App\Foundation\Http\Routing\Router;
 use App\Http\Controllers\SampleController;
@@ -38,7 +39,7 @@ class RouterTest extends TestCase
     /**
      * @test
      */
-    public function resolve()
+    public function handle()
     {
         // リクエストのモック
         $_SERVER['REQUEST_METHOD'] = 'GET';
@@ -46,7 +47,7 @@ class RouterTest extends TestCase
         $_GET['id'] = '1';
         $request = $this->creator->fromGlobals();
         // リクエストの処理をルーターに移譲
-        $response = $this->router->resolve($request);
+        $response = $this->router->handle($request);
         // 処理された後のレスポンス確認
         $this->assertEquals(
             json_encode([
@@ -65,11 +66,28 @@ class RouterTest extends TestCase
     {
         $this->expectException(MethodNotAllowedException::class);
         // リクエストのモック
-        $request = $this->creator->fromArrays(
-            server: ['REQUEST_METHOD' => 'QUERY', 'REQUEST_URI' => '/sample'],
-            get: ['id' => '1']
-        );
+        $_SERVER['REQUEST_METHOD'] = 'QUERY';
+        $_SERVER['REQUEST_URI'] = '/sample';
+        $_GET['id'] = '1';
+        $request = $this->creator->fromGlobals();
         // リクエストの処理をルーターに移譲
-        $response = $this->router->resolve($request);
+        $response = $this->router->handle($request);
+    }
+
+    /**
+     * @test
+     *
+     * @return void
+     */
+    public function routeNotFound()
+    {
+        $this->expectException(RouteNotFoundException::class);
+        // リクエストのモック
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = '/hoge';
+        $_GET['id'] = '1';
+        $request = $this->creator->fromGlobals();
+        // リクエストの処理をルーターに移譲
+        $response = $this->router->handle($request);
     }
 }

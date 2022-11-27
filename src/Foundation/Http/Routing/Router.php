@@ -7,7 +7,6 @@ use App\Foundation\Http\Enums\HttpMethod;
 use App\Foundation\Http\Routing\Exceptions\MethodNotAllowedException;
 use App\Foundation\Http\Routing\Exceptions\RouteAlreadyExistsException;
 use App\Foundation\Http\Routing\Exceptions\RouteNotFoundException;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -15,7 +14,6 @@ class Router
 {
     /** @var array<string,array<Route> */
     private array $routes;
-    private ContainerInterface $container;
 
     /**
      * @param array<Route>>
@@ -36,7 +34,6 @@ class Router
             }
             $this->routes[$route->httpMethod->name][] = $route;
         }
-        $this->container = Container::instance();
     }
 
     private function isDuplicate(Route $route): bool
@@ -55,20 +52,13 @@ class Router
      * @return ResponseInterface
      * @throws MethodNotAllowedException|RouteNotFoundException
      */
-    public function resolve(ServerRequestInterface $request): ResponseInterface
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
         if (!array_key_exists($request->getMethod(), $this->routes)) {
             throw new MethodNotAllowedException();
         }
         $route = $this->findRoute($request);
-        // コントローラーのインスタンス化
-        $controller = $this->container->get($route->controller);
-        // 依存クラスの取得
-        $dependencies = Container::instantiateDependencies($route->controller, $route->action);
-        // アクションの実行
-        $response = $controller->{$route->action}(...$dependencies);
-
-        return $response;
+        return $route->run();
     }
 
     /**

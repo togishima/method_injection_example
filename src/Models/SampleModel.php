@@ -13,7 +13,7 @@ class SampleModel
         $this->child = $child;
     }
 
-    public static function find(int $id): self
+    public static function find(?int $id): self
     {
         return new self(new ChildModel());
     }

@@ -2,6 +2,7 @@
 
 use App\Foundation\DI\Container;
 use App\Http\Controllers\SampleController;
+use App\Http\Requests\SampleRequest;
 use Nyholm\Psr7Server\ServerRequestCreatorInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -21,7 +22,9 @@ class SampleControllerTest extends TestCase
     public function testIndexAction()
     {
         // リクエストのモック
-        $request = $this->creator->fromArrays(server: ['REQUEST_METHOD' => 'GET'], get: ['id' => '1']);
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_GET['id'] = '1';
+        $request = new SampleRequest($this->creator->fromGlobals());
         // アクションの実行
         $response = $this->controller->index($request);
         // レスポンスの確認

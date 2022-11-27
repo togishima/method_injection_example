@@ -2,7 +2,9 @@
 
 namespace App\Foundation\Http\Routing;
 
+use App\Foundation\DI\Container;
 use App\Foundation\Http\Enums\HttpMethod;
+use Psr\Http\Message\ResponseInterface;
 
 class Route
 {
@@ -14,7 +16,7 @@ class Route
     ) {
     }
 
-    public static function get(string $uri, string $controller, ?string $action = null):self
+    public static function get(string $uri, string $controller, ?string $action = null): self
     {
         $action = $action ?? '__invoke';
         return new self(HttpMethod::GET, $uri, $controller, $action);
@@ -23,4 +25,14 @@ class Route
     /**
      * 以下略...
      */
+
+    public function run(): ResponseInterface
+    {
+        // コントローラーのインスタンス化
+        $controller = Container::instance()->get($this->controller);
+        // 依存クラスの取得
+        $dependencies = Container::instantiateDependencies($this->controller, $this->action);
+        // アクションの実行
+        return $controller->{$this->action}(...$dependencies);
+    }
 }
